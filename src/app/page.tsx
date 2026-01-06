@@ -7,9 +7,11 @@ import EquationLibrary from '@/components/equations/equation-library';
 import type { Equation, Note } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/layout/header';
-import { Bot, BrainCircuit, NotebookText } from 'lucide-react';
+import { Bot, BrainCircuit, NotebookText, FunctionSquare, Library } from 'lucide-react';
 import EquationSolver from '@/components/equations/equation-solver';
 import NotesManager from '@/components/notes/notes-manager';
+import FunctionPlotter from '@/components/tools/function-plotter';
+import AiAssistant from '@/components/ai/ai-assistant';
 
 const initialEquations: Equation[] = [
   { id: 1, name: 'الصيغة التربيعية', latex: 'x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}' },
@@ -22,7 +24,7 @@ const initialNotes: Note[] = [
   { id: 2, title: 'ملخص التفاضل والتكامل', content: '## المفاهيم الأساسية\n\n1.  **النهايات (Limits):** أساس التفاضل.\n2.  **المشتقات (Derivatives):** تقيس معدل التغير.\n3.  **التكامل (Integrals):** يحسب المساحة تحت المنحنى.', createdAt: new Date() }
 ]
 
-type ActiveView = 'library' | 'solver' | 'notes';
+export type ActiveView = 'library' | 'solver' | 'notes' | 'plotter';
 
 export default function Home() {
   const [equations, setEquations] = useState<Equation[]>(initialEquations);
@@ -86,6 +88,34 @@ export default function Home() {
   const handlePrint = () => {
     window.print();
   };
+
+  const renderActiveView = () => {
+    switch (activeView) {
+      case 'library':
+        return <EquationLibrary 
+                  equations={equations}
+                  onDelete={deleteEquation}
+                  onUpdate={updateEquation}
+                />;
+      case 'solver':
+        return <EquationSolver />;
+      case 'notes':
+        return <NotesManager 
+                  notes={notes}
+                  onAdd={addNote}
+                  onUpdate={updateNote}
+                  onDelete={deleteNote}
+                />;
+      case 'plotter':
+        return <FunctionPlotter />;
+      default:
+        return <EquationLibrary 
+                  equations={equations}
+                  onDelete={deleteEquation}
+                  onUpdate={updateEquation}
+                />;
+    }
+  }
 
   return (
     <>
@@ -153,6 +183,7 @@ export default function Home() {
             }
           `}</style>
       </div>
+      <AiAssistant equations={equations} notes={notes} addNote={addNote} addEquation={addEquation} />
       <SidebarProvider>
         <div className="flex flex-col min-h-screen">
           <Sidebar>
@@ -174,22 +205,7 @@ export default function Home() {
           <SidebarInset>
               <Header onExportPdf={handlePrint} activeView={activeView} setActiveView={setActiveView} />
               <main className="flex-1 container mx-auto p-4 md:p-6 lg:p-8">
-                  {activeView === 'library' && (
-                    <EquationLibrary 
-                        equations={equations}
-                        onDelete={deleteEquation}
-                        onUpdate={updateEquation}
-                    />
-                  )}
-                  {activeView === 'solver' && <EquationSolver />}
-                  {activeView === 'notes' && (
-                    <NotesManager 
-                      notes={notes}
-                      onAdd={addNote}
-                      onUpdate={updateNote}
-                      onDelete={deleteNote}
-                    />
-                  )}
+                  {renderActiveView()}
               </main>
           </SidebarInset>
         </div>

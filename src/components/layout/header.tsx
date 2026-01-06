@@ -2,10 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Bot, BrainCircuit, FileDown, Library, Menu, NotebookText } from "lucide-react";
+import { Bot, BrainCircuit, FileDown, Library, Menu, NotebookText, FunctionSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { type ActiveView } from "@/app/page";
 
-type ActiveView = 'library' | 'solver' | 'notes';
 
 interface HeaderProps {
   onExportPdf: () => void;
@@ -17,6 +17,7 @@ export default function Header({ onExportPdf, activeView, setActiveView }: Heade
   const navButtons: { view: ActiveView; label: string; icon: React.ElementType }[] = [
     { view: 'library', label: 'المكتبة', icon: Library },
     { view: 'solver', label: 'حلّال المعادلات', icon: Bot },
+    { view: 'plotter', label: 'راسم الدوال', icon: FunctionSquare },
     { view: 'notes', label: 'ملاحظاتي', icon: NotebookText },
   ];
 
