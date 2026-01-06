@@ -7,7 +7,7 @@ import EquationLibrary from '@/components/equations/equation-library';
 import type { Equation, Note } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/layout/header';
-import { Bot, BrainCircuit, NotebookText, SigmaSquare } from 'lucide-react';
+import { Bot, BrainCircuit, NotebookText } from 'lucide-react';
 import EquationSolver from '@/components/equations/equation-solver';
 import NotesManager from '@/components/notes/notes-manager';
 
@@ -94,9 +94,9 @@ export default function Home() {
           <SidebarContent className="p-0 border-r border-border/50 bg-sidebar/95 backdrop-blur-sm">
              <SidebarHeader className="p-4 border-b border-border/50">
                 <a href="/" className="flex items-center space-x-2 rtl:space-x-reverse">
-                    <SigmaSquare className="h-8 w-8 text-primary" />
+                    <BrainCircuit className="h-8 w-8 text-primary" />
                     <span className="inline-block font-bold font-headline text-2xl bg-gradient-to-r from-primary to-primary-foreground/80 text-transparent bg-clip-text">
-                      Equation Ace
+                      Note Ace
                     </span>
                 </a>
             </SidebarHeader>

@@ -2,16 +2,26 @@
 
 import { useState } from "react";
 import Latex from "react-latex-next";
+import ReactMarkdown from "react-markdown";
 import { identifyAndConvertUnits } from "@/ai/flows/identify-and-convert-units";
+import { defineEquationVariables } from "@/ai/flows/define-equation-variables";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import type { Equation } from "@/lib/types";
-import { Clipboard, Copy, Edit, EllipsisVertical, Library, Loader2, Replace, Trash2 } from "lucide-react";
+import { Clipboard, Copy, Edit, EllipsisVertical, Library, Loader2, Replace, Trash2, BookText } from "lucide-react";
 import EquationEditor from "./equation-editor";
-import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
 interface EquationLibraryProps {
   equations: Equation[];
@@ -21,6 +31,9 @@ interface EquationLibraryProps {
 
 export default function EquationLibrary({ equations, onDelete, onUpdate }: EquationLibraryProps) {
   const [convertingId, setConvertingId] = useState<number | null>(null);
+  const [definingId, setDefiningId] = useState<number | null>(null);
+  const [definitions, setDefinitions] = useState<string | null>(null);
+  const [isDefinitionsOpen, setIsDefinitionsOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const { toast } = useToast();
@@ -51,6 +64,26 @@ export default function EquationLibrary({ equations, onDelete, onUpdate }: Equat
     }
   };
 
+  const handleDefine = async (equation: Equation) => {
+    setDefiningId(equation.id);
+    setDefinitions(null);
+    try {
+      const result = await defineEquationVariables({ equation: equation.latex });
+      setDefinitions(result.definitions);
+      setIsDefinitionsOpen(true);
+    } catch (error) {
+      console.error("Variable definition failed:", error);
+      toast({
+        variant: "destructive",
+        title: "فشل الشرح",
+        description: "حدث خطأ أثناء محاولة شرح متغيرات المعادلة.",
+      });
+    } finally {
+      setDefiningId(null);
+    }
+  };
+
+
   const copyToClipboard = (text: string, type: string) => {
     navigator.clipboard.writeText(text);
     toast({
@@ -66,7 +99,6 @@ export default function EquationLibrary({ equations, onDelete, onUpdate }: Equat
   }
 
   const closeEditDialog = () => {
-    // A small delay to allow the dialog to close before resetting the ID
     setTimeout(() => {
         setEditingId(null);
     }, 150);
@@ -154,7 +186,20 @@ export default function EquationLibrary({ equations, onDelete, onUpdate }: Equat
                   )}
 
               </CardContent>
-              <CardFooter className="no-print pt-4">
+              <CardFooter className="no-print pt-4 flex-col items-stretch gap-2">
+                 <Button
+                      variant="outline"
+                      className="w-full bg-secondary/80 border-border hover:bg-secondary hover:text-primary"
+                      onClick={() => handleDefine(eq)}
+                      disabled={definingId === eq.id}
+                  >
+                      {definingId === eq.id ? (
+                        <Loader2 className="animate-spin ms-2 h-4 w-4" />
+                      ) : (
+                        <BookText className="ms-2 h-4 w-4" />
+                      )}
+                      شرح المتغيرات
+                  </Button>
                  <Button
                       variant="outline"
                       className="w-full bg-secondary/80 border-border hover:bg-secondary hover:text-primary"
@@ -173,6 +218,21 @@ export default function EquationLibrary({ equations, onDelete, onUpdate }: Equat
           ))}
         </div>
       )}
+       <AlertDialog open={isDefinitionsOpen} onOpenChange={setIsDefinitionsOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-primary"><BookText /> شرح متغيرات المعادلة</AlertDialogTitle>
+            <AlertDialogDescription>
+              <div className="prose-custom dir-rtl text-right max-h-[50vh] overflow-y-auto mt-4">
+                {definitions ? <ReactMarkdown>{definitions}</ReactMarkdown> : <p>جاري التحميل...</p>}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>إغلاق</AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Bot, FileDown, Library, Menu, NotebookText, SigmaSquare } from "lucide-react";
+import { Bot, BrainCircuit, FileDown, Library, Menu, NotebookText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ActiveView = 'library' | 'solver' | 'notes';
@@ -28,8 +28,8 @@ export default function Header({ onExportPdf, activeView, setActiveView }: Heade
               <Menu className="h-5 w-5" />
             </SidebarTrigger>
             <span className="font-bold font-headline text-lg flex items-center gap-2">
-              <SigmaSquare className="w-6 h-6 text-primary" />
-              Equation Ace
+              <BrainCircuit className="w-6 h-6 text-primary" />
+              Note Ace
             </span>
         </div>
         
