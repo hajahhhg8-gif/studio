@@ -18,8 +18,8 @@ export default {
     extend: {
       fontFamily: {
         body: ['Tajawal', 'sans-serif'],
-        headline: ['Space Grotesk', 'sans-serif'],
-        code: ['monospace'],
+        headline: ['Orbitron', 'sans-serif'],
+        code: ['Fira Code', 'monospace'],
       },
       colors: {
         background: 'hsl(var(--background))',

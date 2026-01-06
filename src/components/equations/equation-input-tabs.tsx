@@ -1,7 +1,7 @@
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FilePenLine, FileUp } from "lucide-react";
+import { FilePenLine, ScanSearch } from "lucide-react";
 import EquationEditor from "./equation-editor";
 import FormulaRecognizer from "./formula-recognizer";
 import type { Equation } from "@/lib/types";
@@ -12,16 +12,16 @@ interface EquationInputTabsProps {
 
 export default function EquationInputTabs({ onSave }: EquationInputTabsProps) {
   return (
-    <div className="w-full">
-      <h2 className="text-2xl font-bold font-headline mb-4">إضافة معادلة جديدة</h2>
+    <div className="w-full space-y-6">
+      <h2 className="text-xl font-bold font-headline text-center text-primary/80">إضافة معادلة جديدة</h2>
       <Tabs defaultValue="manual" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-2 bg-secondary/50">
           <TabsTrigger value="manual">
             <FilePenLine className="ms-2 h-4 w-4" />
             إدخال يدوي
           </TabsTrigger>
           <TabsTrigger value="image">
-            <FileUp className="ms-2 h-4 w-4" />
+            <ScanSearch className="ms-2 h-4 w-4" />
             تعرف من صورة
           </TabsTrigger>
         </TabsList>

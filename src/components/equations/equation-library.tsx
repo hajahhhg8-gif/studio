@@ -3,21 +3,25 @@
 import { useState } from "react";
 import Latex from "react-latex-next";
 import { identifyAndConvertUnits } from "@/ai/flows/identify-and-convert-units";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import type { Equation } from "@/lib/types";
-import { Library, Loader2, Scale, Trash2 } from "lucide-react";
+import { Clipboard, Copy, Edit, EllipsisVertical, Library, Loader2, Replace, Trash2 } from "lucide-react";
+import EquationEditor from "./equation-editor";
 
 interface EquationLibraryProps {
   equations: Equation[];
   onDelete: (id: number) => void;
-  onUpdate: (id: number, updates: Partial<Equation>) => void;
+  onUpdate: (id: number, updates: Partial<Omit<Equation, 'id'>>) => void;
 }
 
 export default function EquationLibrary({ equations, onDelete, onUpdate }: EquationLibraryProps) {
   const [convertingId, setConvertingId] = useState<number | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const { toast } = useToast();
 
   const handleConvert = async (equation: Equation) => {
@@ -41,75 +45,124 @@ export default function EquationLibrary({ equations, onDelete, onUpdate }: Equat
     }
   };
 
+  const copyToClipboard = (text: string, type: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "تم النسخ",
+      description: `تم نسخ ${type} إلى الحافظة.`,
+    });
+  };
+
+  const openEditDialog = (id: number) => {
+    setEditingId(id);
+    setIsEditDialogOpen(true);
+  }
+
+  const closeEditDialog = () => {
+    setEditingId(null);
+    setIsEditDialogOpen(false);
+  }
+
+
   return (
-    <div className="printable-area">
-      <div className="flex items-center gap-4 mb-4">
-        <Library className="w-8 h-8 text-primary" />
-        <h2 className="text-2xl font-bold font-headline">مكتبة المعادلات</h2>
+    <div className="printable-area space-y-8 animate-in fade-in-50">
+      <div className="flex items-center gap-4 mb-6">
+        <Library className="w-10 h-10 text-primary" />
+        <h1 className="text-3xl font-bold font-headline md:text-4xl">مكتبة المعادلات</h1>
       </div>
 
       {equations.length === 0 ? (
-        <Card className="text-center py-12 bg-card/50">
-          <CardHeader>
-            <CardTitle>مكتبتك فارغة</CardTitle>
-            <CardDescription>ابدأ بإضافة بعض المعادلات لعرضها هنا.</CardDescription>
-          </CardHeader>
-        </Card>
+        <div className="flex flex-col items-center justify-center text-center py-20 bg-background/50 rounded-xl border-2 border-dashed border-border">
+          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-6 ring-4 ring-primary/20">
+             <Library className="w-10 h-10 text-primary" />
+          </div>
+          <h2 className="text-2xl font-bold font-headline">مكتبتك فارغة حاليًا</h2>
+          <p className="text-muted-foreground mt-2 max-w-sm">
+            ابدأ بإضافة بعض المعادلات من الشريط الجانبي لعرضها هنا والتحكم فيها.
+          </p>
+        </div>
       ) : (
-        <Accordion type="multiple" className="w-full space-y-4">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {equations.map((eq) => (
-            <AccordionItem value={`item-${eq.id}`} key={eq.id} className="bg-card/70 border-border/50 rounded-lg shadow-md backdrop-blur-sm">
-              <AccordionTrigger className="px-6 py-4 text-lg font-semibold hover:no-underline text-foreground">
-                {eq.name}
-              </AccordionTrigger>
-              <AccordionContent className="px-6 pb-6">
-                <div className="space-y-6">
-                  {/* Original Equation */}
-                  <div>
-                    <h4 className="font-semibold mb-2 text-muted-foreground">المعادلة الأصلية</h4>
-                    <div className="p-4 bg-background/50 rounded-md text-lg text-center dir-ltr text-foreground">
+            <Card key={eq.id} className="flex flex-col bg-background/50 border-border/80 hover:border-primary/50 transition-all duration-300 shadow-lg hover:shadow-primary/20">
+              <CardHeader className="flex-row items-start justify-between">
+                <CardTitle className="font-headline text-xl flex-1 text-primary-foreground">{eq.name}</CardTitle>
+                <Dialog open={isEditDialogOpen && editingId === eq.id} onOpenChange={setIsEditDialogOpen}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 no-print text-muted-foreground hover:text-primary hover:bg-primary/10">
+                        <EllipsisVertical className="h-5 w-5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-secondary border-border/60">
+                      <DropdownMenuItem onSelect={() => openEditDialog(eq.id)}>
+                          <Edit className="ms-2" />
+                          تعديل
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => copyToClipboard(eq.latex, 'كود LaTeX')}>
+                        <Clipboard className="ms-2" />
+                        نسخ كود LaTeX
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => copyToClipboard(`$$${eq.latex}$$`, 'المعادلة')}>
+                        <Copy className="ms-2" />
+                        نسخ المعادلة
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator className="bg-border/50" />
+                      <DropdownMenuItem onClick={() => onDelete(eq.id)} className="text-destructive focus:text-destructive">
+                        <Trash2 className="ms-2" />
+                        حذف
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="bg-background border-primary/50">
+                    <DialogHeader>
+                      <DialogTitle>تعديل المعادلة</DialogTitle>
+                    </DialogHeader>
+                    <EquationEditor 
+                      onSave={(updates) => onUpdate(eq.id, updates)} 
+                      initialData={eq} 
+                      onFinished={closeEditDialog}
+                    />
+                  </DialogContent>
+                </Dialog>
+              </CardHeader>
+              <CardContent className="flex-1 space-y-4">
+                 <div>
+                    <h4 className="font-semibold mb-2 text-muted-foreground text-sm">المعادلة (LaTeX)</h4>
+                    <div className="p-4 bg-black/50 rounded-md text-lg text-center dir-ltr text-green-400 font-code overflow-x-auto border border-green-400/20 shadow-inner">
                       <Latex>{`$$${eq.latex}$$`}</Latex>
                     </div>
-                    <p className="mt-2 p-3 bg-slate-900/80 text-cyan-300 rounded-md font-code text-sm text-left dir-ltr break-all">{eq.latex}</p>
                   </div>
 
-                  {/* Converted Equation */}
                   {eq.convertedLatex && (
                     <div>
-                      <h4 className="font-semibold mb-2 text-muted-foreground">بعد تحويل الوحدات (SI)</h4>
-                       <div className="p-4 bg-background/50 rounded-md text-lg text-center dir-ltr text-foreground">
+                      <h4 className="font-semibold mb-2 text-muted-foreground text-sm">بعد تحويل الوحدات (SI)</h4>
+                       <div className="p-4 bg-black/50 rounded-md text-lg text-center dir-ltr text-cyan-400 font-code overflow-x-auto border border-cyan-400/20 shadow-inner">
                         <Latex>{`$$${eq.convertedLatex}$$`}</Latex>
                       </div>
-                      <p className="mt-2 p-3 bg-slate-900/80 text-cyan-300 rounded-md font-code text-sm text-left dir-ltr break-all">{eq.convertedLatex}</p>
                     </div>
                   )}
 
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 justify-end pt-2 no-print">
-                    <Button
+              </CardContent>
+              <CardFooter className="no-print pt-4">
+                 <Button
                       variant="outline"
-                      size="sm"
+                      className="w-full bg-secondary/80 border-border hover:bg-secondary hover:text-primary"
                       onClick={() => handleConvert(eq)}
                       disabled={convertingId === eq.id}
-                      className="bg-secondary/50 border-secondary-foreground/20 hover:bg-secondary/80"
                     >
                       {convertingId === eq.id ? (
                         <Loader2 className="animate-spin ms-2 h-4 w-4" />
                       ) : (
-                        <Scale className="ms-2 h-4 w-4" />
+                        <Replace className="ms-2 h-4 w-4" />
                       )}
                       تحويل الوحدات
                     </Button>
-                    <Button variant="destructive" size="sm" onClick={() => onDelete(eq.id)} className="bg-red-500/20 border border-red-500/50 hover:bg-red-500/40 text-red-300">
-                      <Trash2 className="ms-2 h-4 w-4" />
-                      حذف
-                    </Button>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
+              </CardFooter>
+            </Card>
           ))}
-        </Accordion>
+        </div>
       )}
     </div>
   );

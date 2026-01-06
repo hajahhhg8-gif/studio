@@ -7,11 +7,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { recognizeHandwrittenFormula } from "@/ai/flows/recognize-handwritten-formula";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Save, ScanSearch, Upload } from "lucide-react";
 import type { Equation } from "@/lib/types";
 
 import {
@@ -22,6 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface FormulaRecognizerProps {
   onSave: (equation: Omit<Equation, 'id'>) => void;
@@ -49,15 +49,11 @@ export default function FormulaRecognizer({ onSave }: FormulaRecognizerProps) {
       setRecognizedLatex(null);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result as string);
+        const result = reader.result as string;
+        setImagePreview(result);
+        setImageData(result);
       };
       reader.readAsDataURL(file);
-
-      const dataReader = new FileReader();
-      dataReader.onloadend = () => {
-        setImageData(dataReader.result as string);
-      };
-      dataReader.readAsDataURL(file);
     }
   };
 
@@ -71,6 +67,7 @@ export default function FormulaRecognizer({ onSave }: FormulaRecognizerProps) {
     try {
       const result = await recognizeHandwrittenFormula({ photoDataUri: imageData });
       setRecognizedLatex(result.latexFormula);
+      toast({ title: "تم التعرف بنجاح", description: "يمكنك الآن حفظ المعادلة." });
     } catch (error) {
       console.error(error);
       toast({ variant: "destructive", title: "فشل التعرف", description: "حدث خطأ أثناء محاولة التعرف على المعادلة." });
@@ -91,55 +88,54 @@ export default function FormulaRecognizer({ onSave }: FormulaRecognizerProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-headline">التعرف على الصيغة</CardTitle>
-        <CardDescription>
-          قم بتحميل صورة لمعادلة مكتوبة بخط اليد وسيقوم الذكاء الاصطناعي بتحويلها إلى LaTeX.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="space-y-4">
         <div>
-          <Label htmlFor="formula-image" className="mb-2 block">صورة المعادلة</Label>
+          <Label htmlFor="formula-image" className="sr-only">صورة المعادلة</Label>
           <Input id="formula-image" type="file" accept="image/*" onChange={handleFileChange} />
         </div>
 
         {imagePreview && (
-          <div className="border rounded-md p-2 flex justify-center bg-muted/50">
-            <Image src={imagePreview} alt="Formula preview" width={300} height={150} style={{ objectFit: 'contain' }} />
+          <div className="border-2 border-dashed border-primary/30 rounded-md p-2 flex justify-center bg-secondary/30">
+            <Image src={imagePreview} alt="Formula preview" width={300} height={150} style={{ objectFit: 'contain' }} className="rounded-sm" />
           </div>
         )}
 
         <Button onClick={handleRecognize} disabled={!imagePreview || isLoading} className="w-full">
-          {isLoading ? <Loader2 className="animate-spin ms-2" /> : <Upload className="ms-2 h-4 w-4" />}
+          {isLoading ? <Loader2 className="animate-spin ms-2" /> : <ScanSearch className="ms-2 h-4 w-4" />}
           {isLoading ? "جاري التعرف..." : "تعرف على المعادلة"}
         </Button>
 
         {recognizedLatex && (
-          <div className="space-y-4 pt-4 border-t">
-            <h3 className="font-semibold">النتيجة:</h3>
-            <p className="p-3 bg-muted rounded-md font-code text-left dir-ltr break-all">{recognizedLatex}</p>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSaveSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>اسم المعادلة للحفظ</FormLabel>
-                      <FormControl>
-                        <Input placeholder="اسم وصفي للمعادلة" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-full">حفظ في المكتبة</Button>
-              </form>
-            </Form>
-          </div>
+          <Card className="space-y-4 pt-4 bg-transparent border-t border-primary/20 shadow-none rounded-none">
+            <CardContent className="p-0 space-y-4">
+                <div>
+                    <h3 className="font-semibold mb-2 text-primary/80">النتيجة (LaTeX):</h3>
+                    <p className="p-3 bg-secondary rounded-md font-code text-left dir-ltr break-all text-green-400">{recognizedLatex}</p>
+                </div>
+                <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSaveSubmit)} className="space-y-4">
+                    <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>اسم المعادلة للحفظ</FormLabel>
+                        <FormControl>
+                            <Input placeholder="اسم وصفي للمعادلة" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <Button type="submit" className="w-full">
+                        <Save className="ms-2" />
+                        حفظ في المكتبة
+                    </Button>
+                </form>
+                </Form>
+            </CardContent>
+          </Card>
         )}
-      </CardContent>
-    </Card>
+      </div>
   );
 }
