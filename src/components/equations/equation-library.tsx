@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import type { Equation } from "@/lib/types";
-import { Clipboard, Copy, Edit, EllipsisVertical, Library, Loader2, Replace, Trash2, BookText } from "lucide-react";
+import { Clipboard, Copy, Edit, EllipsisVertical, Library, Loader2, Replace, Trash2, BookText, Info } from "lucide-react";
 import EquationEditor from "./equation-editor";
 import {
   AlertDialog,
@@ -38,13 +38,15 @@ export default function EquationLibrary({ equations, onDelete, onUpdate }: Equat
   const [isDefinitionsOpen, setIsDefinitionsOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [noUnitsMessageId, setNoUnitsMessageId] = useState<number | null>(null);
   const { toast } = useToast();
 
   const handleConvert = async (equation: Equation) => {
     setConvertingId(equation.id);
+    setNoUnitsMessageId(null);
     try {
       const result = await identifyAndConvertUnits({ equation: equation.latex });
-      if (result && result.convertedEquation) {
+      if (result && result.convertedEquation && result.convertedEquation !== equation.latex) {
         onUpdate(equation.id, { convertedLatex: result.convertedEquation });
         toast({
           title: "تم التحويل بنجاح",
@@ -52,14 +54,17 @@ export default function EquationLibrary({ equations, onDelete, onUpdate }: Equat
           className: 'bg-secondary border-primary/50 text-foreground'
         });
       } else {
-        throw new Error("Invalid response from conversion flow.");
+        // If the equation is the same, it means no units were found to convert.
+        setNoUnitsMessageId(equation.id);
+        // Clear message after a few seconds
+        setTimeout(() => setNoUnitsMessageId(null), 5000);
       }
     } catch (error) {
       console.error("Unit conversion failed:", error);
       toast({
         variant: "destructive",
         title: "فشل التحويل",
-        description: "حدث خطأ أثناء محاولة تحويل الوحدات. قد تكون المعادلة لا تحتوي على وحدات قابلة للتحويل.",
+        description: "حدث خطأ أثناء محاولة تحويل الوحدات.",
       });
     } finally {
       setConvertingId(null);
@@ -69,17 +74,17 @@ export default function EquationLibrary({ equations, onDelete, onUpdate }: Equat
   const handleDefine = async (equation: Equation) => {
     setDefiningId(equation.id);
     setDefinitions(null);
+    setIsDefinitionsOpen(true); // Open dialog immediately
     try {
       const result = await defineEquationVariables({ equation: equation.latex });
-      setDefinitions(result.definitions);
-      setIsDefinitionsOpen(true);
+      if (result && result.definitions) {
+        setDefinitions(result.definitions);
+      } else {
+         throw new Error("Invalid response from definition flow.");
+      }
     } catch (error) {
       console.error("Variable definition failed:", error);
-      toast({
-        variant: "destructive",
-        title: "فشل الشرح",
-        description: "حدث خطأ أثناء محاولة شرح متغيرات المعادلة.",
-      });
+      setDefinitions("حدث خطأ أثناء محاولة شرح متغيرات المعادلة.");
     } finally {
       setDefiningId(null);
     }
@@ -203,6 +208,14 @@ export default function EquationLibrary({ equations, onDelete, onUpdate }: Equat
                     </div>
                   )}
 
+                  {noUnitsMessageId === eq.id && (
+                     <div className="p-2 text-center text-sm text-amber-300 bg-amber-900/30 border border-amber-500/30 rounded-md flex items-center justify-center gap-2">
+                        <Info size={16} />
+                        المعادلة لا تحتوي على وحدات قابلة للتحويل.
+                    </div>
+                  )}
+
+
               </CardContent>
               <CardFooter className="no-print pt-4 flex-col items-stretch gap-2">
                  <Button
@@ -241,11 +254,16 @@ export default function EquationLibrary({ equations, onDelete, onUpdate }: Equat
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-primary"><BookText /> شرح متغيرات المعادلة</AlertDialogTitle>
-            <AlertDialogDescription>
-              <div className="prose-custom dir-rtl text-right max-h-[50vh] overflow-y-auto mt-4">
-                {definitions ? <ReactMarkdown>{definitions}</ReactMarkdown> : <p>جاري التحميل...</p>}
-              </div>
-            </AlertDialogDescription>
+             <div className="prose-custom dir-rtl text-right max-h-[50vh] overflow-y-auto mt-4 pr-4">
+                {!definitions ? (
+                    <div className="flex items-center justify-center gap-2 text-muted-foreground p-8">
+                        <Loader2 className="animate-spin h-5 w-5" />
+                        <span>جاري التحميل...</span>
+                    </div>
+                ) : (
+                   <ReactMarkdown>{definitions}</ReactMarkdown>
+                )}
+            </div>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>إغلاق</AlertDialogCancel>
