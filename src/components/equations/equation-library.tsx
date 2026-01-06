@@ -34,7 +34,7 @@ export default function EquationLibrary({ equations, onDelete, onUpdate }: Equat
   const [searchQuery, setSearchQuery] = useState("");
   const [convertingId, setConvertingId] = useState<number | null>(null);
   const [definingId, setDefiningId] = useState<number | null>(null);
-  const [definitions, setDefinitions] = useState<string | null>(null);
+  const [variableDefinitions, setVariableDefinitions] = useState<string | null>(null);
   const [isDefinitionsOpen, setIsDefinitionsOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -73,18 +73,18 @@ export default function EquationLibrary({ equations, onDelete, onUpdate }: Equat
 
   const handleDefine = async (equation: Equation) => {
     setDefiningId(equation.id);
-    setDefinitions(null);
+    setVariableDefinitions(null);
     setIsDefinitionsOpen(true); // Open dialog immediately
     try {
       const result = await defineEquationVariables({ equation: equation.latex });
       if (result && result.definitions) {
-        setDefinitions(result.definitions);
+        setVariableDefinitions(result.definitions);
       } else {
          throw new Error("Invalid response from definition flow.");
       }
     } catch (error) {
       console.error("Variable definition failed:", error);
-      setDefinitions("حدث خطأ أثناء محاولة شرح متغيرات المعادلة.");
+      setVariableDefinitions("حدث خطأ أثناء محاولة شرح متغيرات المعادلة.");
     } finally {
       setDefiningId(null);
     }
@@ -255,13 +255,13 @@ export default function EquationLibrary({ equations, onDelete, onUpdate }: Equat
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-primary"><BookText /> شرح متغيرات المعادلة</AlertDialogTitle>
              <div className="prose-custom dir-rtl text-right max-h-[50vh] overflow-y-auto mt-4 pr-4">
-                {!definitions ? (
+                {!variableDefinitions ? (
                     <div className="flex items-center justify-center gap-2 text-muted-foreground p-8">
                         <Loader2 className="animate-spin h-5 w-5" />
                         <span>جاري التحميل...</span>
                     </div>
                 ) : (
-                   <ReactMarkdown>{definitions}</ReactMarkdown>
+                   <ReactMarkdown>{variableDefinitions}</ReactMarkdown>
                 )}
             </div>
           </AlertDialogHeader>
