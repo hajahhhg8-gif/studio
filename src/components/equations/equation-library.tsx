@@ -22,6 +22,7 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
+import { Input } from "../ui/input";
 
 interface EquationLibraryProps {
   equations: Equation[];
@@ -30,6 +31,7 @@ interface EquationLibraryProps {
 }
 
 export default function EquationLibrary({ equations, onDelete, onUpdate }: EquationLibraryProps) {
+  const [searchQuery, setSearchQuery] = useState("");
   const [convertingId, setConvertingId] = useState<number | null>(null);
   const [definingId, setDefiningId] = useState<number | null>(null);
   const [definitions, setDefinitions] = useState<string | null>(null);
@@ -105,27 +107,43 @@ export default function EquationLibrary({ equations, onDelete, onUpdate }: Equat
     setIsEditDialogOpen(false);
   }
 
+  const filteredEquations = equations.filter(eq =>
+    eq.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
 
   return (
-    <div className="printable-area space-y-8 animate-in fade-in-50">
-      <div className="flex items-center gap-4 mb-6">
-        <Library className="w-10 h-10 text-primary" />
-        <h1 className="text-3xl font-bold font-headline md:text-4xl bg-gradient-to-r from-primary to-foreground text-transparent bg-clip-text">مكتبة المعادلات</h1>
+    <div className="space-y-8 animate-in fade-in-50">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex items-center gap-4">
+            <Library className="w-10 h-10 text-primary" />
+            <h1 className="text-3xl font-bold font-headline md:text-4xl bg-gradient-to-r from-primary to-foreground text-transparent bg-clip-text">مكتبة المعادلات</h1>
+        </div>
+         <Input
+            type="search"
+            placeholder="ابحث عن معادلة..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="md:max-w-xs bg-secondary/50 border-border"
+          />
       </div>
 
-      {equations.length === 0 ? (
+      <div className="printable-area space-y-8">
+      {filteredEquations.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center py-20 bg-card/50 rounded-xl border-2 border-dashed border-border">
           <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-6 ring-4 ring-primary/20">
              <Library className="w-10 h-10 text-primary" />
           </div>
-          <h2 className="text-2xl font-bold font-headline">مكتبتك فارغة حاليًا</h2>
+          <h2 className="text-2xl font-bold font-headline">
+            {searchQuery ? 'لا توجد نتائج بحث' : 'مكتبتك فارغة حاليًا'}
+            </h2>
           <p className="text-muted-foreground mt-2 max-w-sm">
-            ابدأ بإضافة بعض المعادلات من الشريط الجانبي لعرضها هنا والتحكم فيها.
+            {searchQuery ? 'جرّب كلمة بحث أخرى.' : 'ابدأ بإضافة بعض المعادلات من الشريط الجانبي لعرضها هنا والتحكم فيها.'}
           </p>
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {equations.map((eq) => (
+          {filteredEquations.map((eq) => (
             <Card key={eq.id} className="flex flex-col bg-card/80 backdrop-blur-sm border-border/80 hover:border-primary/50 transition-all duration-300 shadow-lg hover:shadow-primary/10">
               <CardHeader className="flex-row items-start justify-between">
                 <CardTitle className="font-headline text-xl flex-1 text-foreground">{eq.name}</CardTitle>
@@ -218,6 +236,7 @@ export default function EquationLibrary({ equations, onDelete, onUpdate }: Equat
           ))}
         </div>
       )}
+      </div>
        <AlertDialog open={isDefinitionsOpen} onOpenChange={setIsDefinitionsOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

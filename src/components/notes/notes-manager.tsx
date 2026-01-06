@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Input } from '../ui/input';
 
 
 interface NotesManagerProps {
@@ -32,6 +33,7 @@ interface NotesManagerProps {
 }
 
 export default function NotesManager({ notes, onAdd, onUpdate, onDelete }: NotesManagerProps) {
+    const [searchQuery, setSearchQuery] = useState("");
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -47,6 +49,10 @@ export default function NotesManager({ notes, onAdd, onUpdate, onDelete }: Notes
         setIsEditDialogOpen(true);
     };
 
+    const filteredNotes = notes.filter(note =>
+        note.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
         <div className="space-y-8 animate-in fade-in-50">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -54,35 +60,46 @@ export default function NotesManager({ notes, onAdd, onUpdate, onDelete }: Notes
                     <NotebookText className="w-10 h-10 text-primary" />
                     <h1 className="text-3xl font-bold font-headline md:text-4xl bg-gradient-to-r from-primary to-foreground text-transparent bg-clip-text">ملاحظاتي</h1>
                 </div>
-                <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button>
-                            <PlusCircle className="ms-2" />
-                            ملاحظة جديدة
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[600px] bg-background border-primary/50">
-                        <DialogHeader>
-                            <DialogTitle>إضافة ملاحظة جديدة</DialogTitle>
-                        </DialogHeader>
-                        <NoteEditor onSave={onAdd} onFinished={() => setIsAddDialogOpen(false)} />
-                    </DialogContent>
-                </Dialog>
+                 <div className='flex items-center gap-2'>
+                    <Input
+                        type="search"
+                        placeholder="ابحث عن ملاحظة..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="md:max-w-xs bg-secondary/50 border-border"
+                    />
+                    <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button className='shrink-0'>
+                                <PlusCircle className="ms-2" />
+                                ملاحظة جديدة
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[600px] bg-background border-primary/50">
+                            <DialogHeader>
+                                <DialogTitle>إضافة ملاحظة جديدة</DialogTitle>
+                            </DialogHeader>
+                            <NoteEditor onSave={onAdd} onFinished={() => setIsAddDialogOpen(false)} />
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
 
-            {notes.length === 0 ? (
+            {filteredNotes.length === 0 ? (
                 <div className="flex flex-col items-center justify-center text-center py-20 bg-card/50 rounded-xl border-2 border-dashed border-border">
                     <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-6 ring-4 ring-primary/20">
                         <NotebookText className="w-10 h-10 text-primary" />
                     </div>
-                    <h2 className="text-2xl font-bold font-headline">لا يوجد ملاحظات بعد</h2>
+                    <h2 className="text-2xl font-bold font-headline">
+                        {searchQuery ? 'لا توجد نتائج بحث' : 'لا يوجد ملاحظات بعد'}
+                    </h2>
                     <p className="text-muted-foreground mt-2 max-w-sm">
-                        ابدأ بتدوين أفكارك وملخصاتك بالضغط على "ملاحظة جديدة".
+                        {searchQuery ? 'جرّب كلمة بحث أخرى.' : 'ابدأ بتدوين أفكارك وملخصاتك بالضغط على "ملاحظة جديدة".'}
                     </p>
                 </div>
             ) : (
                 <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                    {notes.map((note) => (
+                    {filteredNotes.map((note) => (
                         <Card key={note.id} className="flex flex-col bg-card/80 backdrop-blur-sm border-border/80 hover:border-primary/50 transition-all duration-300 shadow-lg hover:shadow-primary/10">
                             <CardHeader>
                                 <CardTitle className="font-headline text-xl text-foreground truncate">{note.title}</CardTitle>
