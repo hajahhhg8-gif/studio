@@ -4,7 +4,7 @@ import { Toaster } from '@/components/ui/toaster';
 import 'katex/dist/katex.min.css';
 
 export const metadata: Metadata = {
-  title: 'Note Ace | ملاحظة ايس',
+  title: 'Equation Note | مذكرة المعادلات',
   description: 'The professional notepad for engineering students.',
 };
 

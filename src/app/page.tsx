@@ -161,7 +161,7 @@ export default function Home() {
                   <a href="/" className="flex items-center space-x-2 rtl:space-x-reverse">
                       <BrainCircuit className="h-8 w-8 text-primary" />
                       <span className="inline-block font-bold font-headline text-2xl bg-gradient-to-r from-primary to-primary-foreground/80 text-transparent bg-clip-text">
-                        Note Ace
+                        Equation Note
                       </span>
                   </a>
               </SidebarHeader>

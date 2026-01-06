@@ -29,7 +29,7 @@ export default function Header({ onExportPdf, activeView, setActiveView }: Heade
             </SidebarTrigger>
             <span className="font-bold font-headline text-lg flex items-center gap-2">
               <BrainCircuit className="w-6 h-6 text-primary" />
-              Note Ace
+              Equation Note
             </span>
         </div>
         
