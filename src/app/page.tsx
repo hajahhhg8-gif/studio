@@ -11,7 +11,6 @@ import { Bot, BrainCircuit, NotebookText, FunctionSquare, Library } from 'lucide
 import EquationSolver from '@/components/equations/equation-solver';
 import NotesManager from '@/components/notes/notes-manager';
 import FunctionPlotter from '@/components/tools/function-plotter';
-import AiAssistant from '@/components/ai/ai-assistant';
 
 const initialEquations: Equation[] = [
   { id: 1, name: 'الصيغة التربيعية', latex: 'x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}' },
@@ -183,7 +182,6 @@ export default function Home() {
             }
           `}</style>
       </div>
-      <AiAssistant equations={equations} notes={notes} addNote={addNote} addEquation={addEquation} />
       <SidebarProvider>
         <div className="flex flex-col min-h-screen">
           <Sidebar>
