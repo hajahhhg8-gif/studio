@@ -13,7 +13,7 @@ interface EquationInputTabsProps {
 export default function EquationInputTabs({ onSave }: EquationInputTabsProps) {
   return (
     <div className="w-full space-y-6">
-      <h2 className="text-xl font-bold font-headline text-center text-primary/80">إضافة معادلة جديدة</h2>
+      <h2 className="text-xl font-bold font-headline text-center text-primary">إضافة معادلة جديدة</h2>
       <Tabs defaultValue="manual" className="w-full">
         <TabsList className="grid w-full grid-cols-2 bg-secondary/50">
           <TabsTrigger value="manual">

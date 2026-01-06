@@ -10,8 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Save, ScanSearch, Upload } from "lucide-react";
+import { Loader2, Save, ScanSearch } from "lucide-react";
 import type { Equation } from "@/lib/types";
+import Latex from 'react-latex-next';
 
 import {
   Form,
@@ -67,7 +68,7 @@ export default function FormulaRecognizer({ onSave }: FormulaRecognizerProps) {
     try {
       const result = await recognizeHandwrittenFormula({ photoDataUri: imageData });
       setRecognizedLatex(result.latexFormula);
-      toast({ title: "تم التعرف بنجاح", description: "يمكنك الآن حفظ المعادلة." });
+      toast({ title: "تم التعرف بنجاح", description: "يمكنك الآن حفظ المعادلة.", className: 'bg-secondary border-primary/50 text-foreground' });
     } catch (error) {
       console.error(error);
       toast({ variant: "destructive", title: "فشل التعرف", description: "حدث خطأ أثناء محاولة التعرف على المعادلة." });
@@ -80,7 +81,7 @@ export default function FormulaRecognizer({ onSave }: FormulaRecognizerProps) {
     if (recognizedLatex) {
       onSave({ name: values.name, latex: recognizedLatex });
       // Reset state
-      form.reset();
+      form.reset({ name: '' });
       setRecognizedLatex(null);
       setImagePreview(null);
       setImageData(null);
@@ -91,11 +92,11 @@ export default function FormulaRecognizer({ onSave }: FormulaRecognizerProps) {
     <div className="space-y-4">
         <div>
           <Label htmlFor="formula-image" className="sr-only">صورة المعادلة</Label>
-          <Input id="formula-image" type="file" accept="image/*" onChange={handleFileChange} />
+          <Input id="formula-image" type="file" accept="image/*" onChange={handleFileChange} className="bg-secondary/50 border-border file:text-primary file:font-bold"/>
         </div>
 
         {imagePreview && (
-          <div className="border-2 border-dashed border-primary/30 rounded-md p-2 flex justify-center bg-secondary/30">
+          <div className="border-2 border-dashed border-border rounded-md p-2 flex justify-center bg-background/50">
             <Image src={imagePreview} alt="Formula preview" width={300} height={150} style={{ objectFit: 'contain' }} className="rounded-sm" />
           </div>
         )}
@@ -107,10 +108,12 @@ export default function FormulaRecognizer({ onSave }: FormulaRecognizerProps) {
 
         {recognizedLatex && (
           <Card className="space-y-4 pt-4 bg-transparent border-t border-primary/20 shadow-none rounded-none">
-            <CardContent className="p-0 space-y-4">
+            <CardContent className="p-0 space-y-6">
                 <div>
-                    <h3 className="font-semibold mb-2 text-primary/80">النتيجة (LaTeX):</h3>
-                    <p className="p-3 bg-secondary rounded-md font-code text-left dir-ltr break-all text-green-400">{recognizedLatex}</p>
+                    <h3 className="font-semibold mb-2 text-primary">المعادلة المعترف بها:</h3>
+                    <div className="p-4 bg-secondary rounded-md text-lg text-center dir-ltr text-foreground overflow-x-auto border border-border">
+                        <Latex>{`$$${recognizedLatex}$$`}</Latex>
+                    </div>
                 </div>
                 <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSaveSubmit)} className="space-y-4">
@@ -121,7 +124,7 @@ export default function FormulaRecognizer({ onSave }: FormulaRecognizerProps) {
                         <FormItem>
                         <FormLabel>اسم المعادلة للحفظ</FormLabel>
                         <FormControl>
-                            <Input placeholder="اسم وصفي للمعادلة" {...field} />
+                            <Input placeholder="اسم وصفي للمعادلة" {...field} className="bg-secondary/50 border-border" />
                         </FormControl>
                         <FormMessage />
                         </FormItem>

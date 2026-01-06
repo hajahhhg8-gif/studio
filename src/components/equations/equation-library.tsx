@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { Equation } from "@/lib/types";
 import { Clipboard, Copy, Edit, EllipsisVertical, Library, Loader2, Replace, Trash2 } from "lucide-react";
 import EquationEditor from "./equation-editor";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 
 interface EquationLibraryProps {
   equations: Equation[];
@@ -28,17 +29,22 @@ export default function EquationLibrary({ equations, onDelete, onUpdate }: Equat
     setConvertingId(equation.id);
     try {
       const result = await identifyAndConvertUnits({ equation: equation.latex });
-      onUpdate(equation.id, { convertedLatex: result.convertedEquation });
-      toast({
-        title: "تم التحويل بنجاح",
-        description: "تم تحويل الوحدات في المعادلة إلى وحدات SI الأساسية.",
-      });
+      if (result && result.convertedEquation) {
+        onUpdate(equation.id, { convertedLatex: result.convertedEquation });
+        toast({
+          title: "تم التحويل بنجاح",
+          description: "تم تحويل الوحدات في المعادلة إلى وحدات SI الأساسية.",
+          className: 'bg-secondary border-primary/50 text-foreground'
+        });
+      } else {
+        throw new Error("Invalid response from conversion flow.");
+      }
     } catch (error) {
       console.error("Unit conversion failed:", error);
       toast({
         variant: "destructive",
         title: "فشل التحويل",
-        description: "حدث خطأ أثناء محاولة تحويل الوحدات.",
+        description: "حدث خطأ أثناء محاولة تحويل الوحدات. قد تكون المعادلة لا تحتوي على وحدات قابلة للتحويل.",
       });
     } finally {
       setConvertingId(null);
@@ -50,6 +56,7 @@ export default function EquationLibrary({ equations, onDelete, onUpdate }: Equat
     toast({
       title: "تم النسخ",
       description: `تم نسخ ${type} إلى الحافظة.`,
+      className: 'bg-secondary border-primary/50 text-foreground'
     });
   };
 
@@ -59,7 +66,10 @@ export default function EquationLibrary({ equations, onDelete, onUpdate }: Equat
   }
 
   const closeEditDialog = () => {
-    setEditingId(null);
+    // A small delay to allow the dialog to close before resetting the ID
+    setTimeout(() => {
+        setEditingId(null);
+    }, 150);
     setIsEditDialogOpen(false);
   }
 
@@ -68,11 +78,11 @@ export default function EquationLibrary({ equations, onDelete, onUpdate }: Equat
     <div className="printable-area space-y-8 animate-in fade-in-50">
       <div className="flex items-center gap-4 mb-6">
         <Library className="w-10 h-10 text-primary" />
-        <h1 className="text-3xl font-bold font-headline md:text-4xl">مكتبة المعادلات</h1>
+        <h1 className="text-3xl font-bold font-headline md:text-4xl bg-gradient-to-r from-primary to-foreground text-transparent bg-clip-text">مكتبة المعادلات</h1>
       </div>
 
       {equations.length === 0 ? (
-        <div className="flex flex-col items-center justify-center text-center py-20 bg-background/50 rounded-xl border-2 border-dashed border-border">
+        <div className="flex flex-col items-center justify-center text-center py-20 bg-card/50 rounded-xl border-2 border-dashed border-border">
           <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-6 ring-4 ring-primary/20">
              <Library className="w-10 h-10 text-primary" />
           </div>
@@ -84,9 +94,9 @@ export default function EquationLibrary({ equations, onDelete, onUpdate }: Equat
       ) : (
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {equations.map((eq) => (
-            <Card key={eq.id} className="flex flex-col bg-background/50 border-border/80 hover:border-primary/50 transition-all duration-300 shadow-lg hover:shadow-primary/20">
+            <Card key={eq.id} className="flex flex-col bg-card/80 backdrop-blur-sm border-border/80 hover:border-primary/50 transition-all duration-300 shadow-lg hover:shadow-primary/10">
               <CardHeader className="flex-row items-start justify-between">
-                <CardTitle className="font-headline text-xl flex-1 text-primary-foreground">{eq.name}</CardTitle>
+                <CardTitle className="font-headline text-xl flex-1 text-foreground">{eq.name}</CardTitle>
                 <Dialog open={isEditDialogOpen && editingId === eq.id} onOpenChange={setIsEditDialogOpen}>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -129,16 +139,15 @@ export default function EquationLibrary({ equations, onDelete, onUpdate }: Equat
               </CardHeader>
               <CardContent className="flex-1 space-y-4">
                  <div>
-                    <h4 className="font-semibold mb-2 text-muted-foreground text-sm">المعادلة (LaTeX)</h4>
-                    <div className="p-4 bg-black/50 rounded-md text-lg text-center dir-ltr text-green-400 font-code overflow-x-auto border border-green-400/20 shadow-inner">
+                    <div className="p-4 bg-black/30 rounded-md text-lg text-center dir-ltr text-foreground overflow-x-auto border border-border shadow-inner min-h-[80px] flex items-center justify-center">
                       <Latex>{`$$${eq.latex}$$`}</Latex>
                     </div>
                   </div>
 
                   {eq.convertedLatex && (
                     <div>
-                      <h4 className="font-semibold mb-2 text-muted-foreground text-sm">بعد تحويل الوحدات (SI)</h4>
-                       <div className="p-4 bg-black/50 rounded-md text-lg text-center dir-ltr text-cyan-400 font-code overflow-x-auto border border-cyan-400/20 shadow-inner">
+                      <h4 className="font-semibold mb-2 text-primary text-sm flex items-center gap-2">بعد تحويل الوحدات (SI) <Replace size={16}/></h4>
+                       <div className="p-4 bg-black/30 rounded-md text-lg text-center dir-ltr text-foreground font-code overflow-x-auto border border-border shadow-inner">
                         <Latex>{`$$${eq.convertedLatex}$$`}</Latex>
                       </div>
                     </div>

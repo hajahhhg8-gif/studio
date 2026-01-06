@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { Equation } from "@/lib/types";
 import { Save } from "lucide-react";
+import Latex from "react-latex-next";
+import { useWatch } from "react-hook-form";
 
 interface EquationEditorProps {
     onSave: (equation: Omit<Equation, 'id'>) => void;
@@ -27,6 +29,18 @@ const formSchema = z.object({
   name: z.string().min(2, "الاسم مطلوب").max(50, "الاسم طويل جدًا"),
   latex: z.string().min(1, "كود LaTeX مطلوب"),
 });
+
+const LivePreview = ({ control }: { control: any }) => {
+  const latexValue = useWatch({ control, name: 'latex' });
+  return (
+    <div className="mt-4">
+      <FormLabel>معاينة حية</FormLabel>
+      <div className="p-4 bg-background border border-dashed border-border rounded-md mt-2 text-lg text-center dir-ltr min-h-[60px] flex items-center justify-center">
+        {latexValue ? <Latex>{`$$${latexValue}$$`}</Latex> : <span className="text-muted-foreground text-sm">اكتب كود LaTeX أعلاه للمعاينة</span>}
+      </div>
+    </div>
+  );
+};
 
 export default function EquationEditor({ onSave, initialData, onFinished }: EquationEditorProps) {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -42,7 +56,7 @@ export default function EquationEditor({ onSave, initialData, onFinished }: Equa
     if(onFinished) {
       onFinished();
     } else {
-      form.reset();
+      form.reset({name: '', latex: ''});
     }
   }
 
@@ -56,7 +70,7 @@ export default function EquationEditor({ onSave, initialData, onFinished }: Equa
             <FormItem>
               <FormLabel>اسم المعادلة</FormLabel>
               <FormControl>
-                <Input placeholder="مثال: نظرية فيثاغورس" {...field} />
+                <Input placeholder="مثال: نظرية فيثاغورس" {...field} className="bg-secondary/50 border-border" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -71,7 +85,7 @@ export default function EquationEditor({ onSave, initialData, onFinished }: Equa
               <FormControl>
                 <Textarea
                   placeholder="a^2 + b^2 = c^2"
-                  className="min-h-[120px] text-left dir-ltr font-code"
+                  className="min-h-[120px] text-left dir-ltr font-code bg-secondary/50 border-border"
                   {...field}
                 />
               </FormControl>
@@ -79,7 +93,8 @@ export default function EquationEditor({ onSave, initialData, onFinished }: Equa
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
+        <LivePreview control={form.control} />
+        <Button type="submit" className="w-full !mt-8">
           <Save className="ms-2" />
           {initialData ? 'تحديث المعادلة' : 'حفظ في المكتبة'}
         </Button>

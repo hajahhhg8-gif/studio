@@ -51,12 +51,12 @@ const EquationSolver = () => {
     <div className="space-y-8 animate-in fade-in-50">
        <div className="flex items-center gap-4 mb-6">
         <Bot className="w-10 h-10 text-primary" />
-        <h1 className="text-3xl font-bold font-headline md:text-4xl">حلّال المعادلات الذكي</h1>
+        <h1 className="text-3xl font-bold font-headline md:text-4xl bg-gradient-to-r from-primary to-foreground text-transparent bg-clip-text">حلّال المعادلات الذكي</h1>
       </div>
 
-      <Card className="bg-background/50 border-border/80">
+      <Card className="bg-card/80 backdrop-blur-sm border-border/80">
         <CardHeader>
-          <CardTitle className="font-headline text-xl text-primary-foreground">أدخل المعادلة</CardTitle>
+          <CardTitle className="font-headline text-xl text-foreground">أدخل المعادلة</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -92,7 +92,7 @@ const EquationSolver = () => {
       </Card>
 
       {solution && (
-        <Card className="bg-background/50 border-primary/30">
+        <Card className="bg-card/80 backdrop-blur-sm border-primary/30">
           <CardHeader>
             <CardTitle className="font-headline text-xl flex items-center gap-2 text-primary">
               <Bot />
@@ -100,17 +100,16 @@ const EquationSolver = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="prose prose-invert prose-p:text-foreground prose-h3:text-primary prose-h3:font-headline prose-code:text-green-400 prose-code:font-code dir-ltr text-left bg-secondary/50 p-4 rounded-md">
+            <div className="prose-custom dir-rtl text-right bg-secondary/50 p-4 rounded-md border border-border">
                <ReactMarkdown
                  components={{
                    p: ({...props}) => <p className="text-foreground" {...props} />,
-                   h3: ({...props}) => <h3 className="text-primary" {...props} />,
                    code({node, inline, className, children, ...props}) {
                      const match = /language-(\w+)/.exec(className || '')
                      if(inline) {
                         return <Latex>{`$${String(children)}$`}</Latex>
                      }
-                     return <Latex>{`$$${String(children)}$$`}</Latex>
+                     return <div className="text-center dir-ltr"><Latex>{`$$${String(children)}$$`}</Latex></div>
                    }
                  }}
                >

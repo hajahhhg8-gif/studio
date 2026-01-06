@@ -8,55 +8,55 @@ body {
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 210 40% 98%;
-    --card: 240 10% 3.9%;
+    --background: 222 84% 4.9%; /* Deep blue */
+    --foreground: 210 40% 98%; /* White */
+    --card: 222 84% 6.5%;
     --card-foreground: 210 40% 98%;
-    --popover: 240 10% 3.9%;
+    --popover: 222 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 262.1 83.3% 57.8%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 240 3.7% 15.9%;
+    --primary: 45 100% 51%; /* Gold */
+    --primary-foreground: 222 84% 4.9%;
+    --secondary: 217 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
+    --muted: 217 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 262.1 83.3% 57.8%;
+    --border: 217 32.6% 17.5%;
+    --input: 217 32.6% 17.5%;
+    --ring: 45 100% 51%;
     --radius: 0.75rem;
 
-    --sidebar-background: 240 10% 3.9%;
+    --sidebar-background: 222 84% 4.9%;
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-accent: 262.1 83.3% 57.8%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-ring: 262.1 83.3% 57.8%;
+    --sidebar-border: 217 32.6% 17.5%;
+    --sidebar-accent: 45 100% 51%;
+    --sidebar-accent-foreground: 222 84% 4.9%;
+    --sidebar-ring: 45 100% 51%;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
+    --background: 222 84% 4.9%;
     --foreground: 210 40% 98%;
-    --card: 240 10% 3.9%;
+    --card: 222 84% 6.5%;
     --card-foreground: 210 40% 98%;
-    --popover: 240 10% 3.9%;
+    --popover: 222 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 262.1 83.3% 57.8%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 240 3.7% 15.9%;
+    --primary: 45 100% 51%;
+    --primary-foreground: 222 84% 4.9%;
+    --secondary: 217 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
+    --muted: 217 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 262.1 83.3% 57.8%;
+    --border: 217 32.6% 17.5%;
+    --input: 217 32.6% 17.5%;
+    --ring: 45 100% 51%;
   }
 }
 
@@ -67,6 +67,40 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Custom prose styles for Markdown rendering in Notes */
+.prose-custom,
+.prose-custom :where(p):not(:where([class~="not-prose"] *)) {
+  color: hsl(var(--foreground));
+  font-size: 1rem;
+  line-height: 1.75;
+}
+.prose-custom :where(h1):not(:where([class~="not-prose"] *)) {
+  color: hsl(var(--primary));
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.25em;
+  font-weight: 800;
+}
+.prose-custom :where(h2):not(:where([class~="not-prose"] *)) {
+  color: hsl(var(--primary));
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.875em;
+  font-weight: 700;
+}
+.prose-custom :where(h3):not(:where([class~="not-prose"] *)) {
+  color: hsl(var(--primary-foreground));
+  font-size: 1.5em;
+  font-weight: 600;
+  background-color: hsl(var(--primary) / 0.8);
+  padding: 0.2em 0.5em;
+  border-radius: 0.25em;
+  display: inline-block;
+}
+.prose-custom :where(blockquote):not(:where([class~="not-prose"] *)) {
+  border-right: 0.25rem solid hsl(var(--primary));
+  color: hsl(var(--muted-foreground));
+  padding-right: 1em;
 }
 
 @media print {
