@@ -1,1 +1,5 @@
-// Flows will be imported for their side effects in this file.
+import { config } from 'dotenv';
+config();
+
+import '@/ai/flows/recognize-handwritten-formula.ts';
+import '@/ai/flows/identify-and-convert-units.ts';
