@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Bot, BrainCircuit, FileDown, Library, Menu, NotebookText, FunctionSquare } from "lucide-react";
+import { Bot, BrainCircuit, FileDown, Library, Menu, NotebookText, FunctionSquare, FileArchive } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type ActiveView } from "@/app/page";
 
@@ -19,6 +19,7 @@ export default function Header({ onExportPdf, activeView, setActiveView }: Heade
     { view: 'solver', label: 'حلّال المعادلات', icon: Bot },
     { view: 'plotter', label: 'راسم الدوال', icon: FunctionSquare },
     { view: 'notes', label: 'ملاحظاتي', icon: NotebookText },
+    { view: 'apk', label: 'تحويل إلى APK', icon: FileArchive },
   ];
 
   return (

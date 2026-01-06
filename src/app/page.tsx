@@ -7,10 +7,11 @@ import EquationLibrary from '@/components/equations/equation-library';
 import type { Equation, Note } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/layout/header';
-import { Bot, BrainCircuit, NotebookText, FunctionSquare, Library } from 'lucide-react';
+import { Bot, BrainCircuit, NotebookText, FunctionSquare, Library, FileArchive } from 'lucide-react';
 import EquationSolver from '@/components/equations/equation-solver';
 import NotesManager from '@/components/notes/notes-manager';
 import FunctionPlotter from '@/components/tools/function-plotter';
+import ApkInstructions from '@/components/apk-instructions';
 
 const initialEquations: Equation[] = [
   { id: 1, name: 'الصيغة التربيعية', latex: 'x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}' },
@@ -23,7 +24,7 @@ const initialNotes: Note[] = [
   { id: 2, title: 'ملخص التفاضل والتكامل', content: '## المفاهيم الأساسية\n\n1.  **النهايات (Limits):** أساس التفاضل.\n2.  **المشتقات (Derivatives):** تقيس معدل التغير.\n3.  **التكامل (Integrals):** يحسب المساحة تحت المنحنى.', createdAt: new Date() }
 ]
 
-export type ActiveView = 'library' | 'solver' | 'notes' | 'plotter';
+export type ActiveView = 'library' | 'solver' | 'notes' | 'plotter' | 'apk';
 
 export default function Home() {
   const [equations, setEquations] = useState<Equation[]>(initialEquations);
@@ -107,6 +108,8 @@ export default function Home() {
                 />;
       case 'plotter':
         return <FunctionPlotter />;
+      case 'apk':
+        return <ApkInstructions />;
       default:
         return <EquationLibrary 
                   equations={equations}
