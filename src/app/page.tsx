@@ -43,7 +43,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-background to-slate-900">
       <Header onExportPdf={handlePrint} />
       <main className="flex-1 container mx-auto p-4 md:p-6 lg:p-8">
         <div className="grid gap-12 lg:grid-cols-5">
