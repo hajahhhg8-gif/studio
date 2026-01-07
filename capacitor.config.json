@@ -1,0 +1,6 @@
+{
+  "appId": "com.equationnote.app",
+  "appName": "Equation Note",
+  "webDir": "out",
+  "bundledWebRuntime": false
+}
